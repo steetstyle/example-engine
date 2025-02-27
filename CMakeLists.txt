@@ -27,12 +27,12 @@ FetchContent_MakeAvailable(vulkan-headers)
 
 # Include directories for your own headers
 include_directories(
-    ${CMAKE_SOURCE_DIR}/include     # Add your include directory
+    ${CMAKE_SOURCE_DIR}/include  # This adds the include directory to the search path
 )
 
 # Add source files from your src directory
-file(GLOB SOURCES
-${CMAKE_SOURCE_DIR}/src/*.cpp  # Add all .cpp files in your src directory
+file(GLOB_RECURSE SOURCES
+    ${CMAKE_SOURCE_DIR}/src/*.cpp  # Recursively include all .cpp files in src and subdirectories
 )
 
 # Add the executable

@@ -1,12 +1,13 @@
 #include <iostream>
 
-#include "src/Application.cpp"
+#include <Application.h>
 
 int main() {
-    Application app;
 
     try {
-        app.run();
+        Application app;
+        app.Run();
+        return 0;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
