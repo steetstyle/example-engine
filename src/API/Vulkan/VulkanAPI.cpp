@@ -15,6 +15,7 @@ void VulkanAPI::Update() {
 }
 
 void VulkanAPI::Cleanup() {
+    vulkanInstance.reset();
     std::cout << "Vulkan API Cleanup\n";
 }
 
