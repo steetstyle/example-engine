@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <API/Vulkan/VulkanDebugUtils.h>
 
 class VulkanInstance {
 public:
@@ -34,11 +35,15 @@ public:
     // Getter for VkInstance
     VkInstance GetVkInstance() const { return vkInstance; }
 
+    // Getter for VulkanDebugUtils to access the debug messenger
+    VulkanDebugUtils* GetDebugUtils() { return debugUtils.get(); } 
+
     // Destructor to clean up Vulkan resources
     ~VulkanInstance();
 
 private:
     VkInstance vkInstance;
+    std::unique_ptr<VulkanDebugUtils> debugUtils;
 };
 
 #endif // VULKANINSTANCE_H

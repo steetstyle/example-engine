@@ -40,6 +40,10 @@ VulkanInstance::VulkanInstance() : vkInstance(VK_NULL_HANDLE) {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create Vulkan instance!");
     }
+
+    if(validationLayersEnabled) {
+        debugUtils = VulkanDebugUtils::Create(vkInstance);
+    }
 }
 
 bool VulkanInstance::CheckValidationLayerSupport() const {
@@ -119,6 +123,10 @@ std::vector<const char *> VulkanInstance::GetRequiredExtensions()
 }
 
 VulkanInstance::~VulkanInstance() {
+    if(debugUtils) {
+        debugUtils.reset();
+    }
+
     if (vkInstance != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance, nullptr);
     }
