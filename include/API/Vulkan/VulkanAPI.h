@@ -5,7 +5,8 @@
 #include "VulkanInstance.h"
 #include <memory>
 
-class VulkanAPI : public IGraphicsAPI {
+class VulkanAPI : public IGraphicsAPI
+{
 public:
     VulkanAPI();
 
