@@ -6,47 +6,43 @@
 #include <vector>
 #include <array>
 #include <API/Vulkan/VulkanDebugUtils.h>
+#include <API/Vulkan/VulkanPhysicalDevice.h>
 
-class VulkanInstance {
+class VulkanInstance
+{
 public:
+#ifdef NDEBUG
+    const bool validationLayersEnabled = false;
+#else
+    const bool validationLayersEnabled = true;
+#endif
     VulkanInstance();
 
-    // Factory method to create VulkanInstance
     static std::unique_ptr<VulkanInstance> Create();
 
-    // Validation layer enablement
-    #ifdef NDEBUG
-        const bool validationLayersEnabled = false;
-    #else
-        const bool validationLayersEnabled = true;
-    #endif
-VulkanInstance();
-    static std::unique_ptr<VulkanInstance> Create();
     ~VulkanInstance();
-    
+
     VkInstance GetVkInstance() const { return vkInstance; }
+
     std::vector<const char *> GetRequiredExtensions();
+
     VulkanDebugUtils *GetDebugUtils() { return debugUtils.get(); }
+
     std::array<const char *, 1> GetValidationLayers() const
     {
         return {"VK_LAYER_KHRONOS_validation"};
     }
 
-    // Instance method to check if validation layers are supported
     bool CheckValidationLayerSupport() const;
 
-    // Getter for VkInstance
-    VkInstance GetVkInstance() const { return vkInstance; }
+    void PickPhysicalDevice();
 
-    // Getter for VulkanDebugUtils to access the debug messenger
-    VulkanDebugUtils* GetDebugUtils() { return debugUtils.get(); } 
-
-    // Destructor to clean up Vulkan resources
-    ~VulkanInstance();
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> GetPhysicalDevices() const { return phsyicalDevices; }
 
 private:
     VkInstance vkInstance;
     std::unique_ptr<VulkanDebugUtils> debugUtils;
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> phsyicalDevices;
 };
 
 #endif // VULKANINSTANCE_H

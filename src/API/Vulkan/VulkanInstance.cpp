@@ -44,6 +44,8 @@ VulkanInstance::VulkanInstance() : vkInstance(VK_NULL_HANDLE) {
     if(validationLayersEnabled) {
         debugUtils = VulkanDebugUtils::Create(vkInstance);
     }
+
+    PickPhysicalDevice();
 }
 
 bool VulkanInstance::CheckValidationLayerSupport() const {
@@ -70,6 +72,26 @@ bool VulkanInstance::CheckValidationLayerSupport() const {
     }
 
     return true;
+}
+
+void VulkanInstance::PickPhysicalDevice()
+{
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+
+    if(deviceCount == 0) throw std::runtime_error("failed to find GPUs with Vulkan support");
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
+
+    // For each available physical device, create a VulkanPhysicalDevice
+    for(const auto &device : devices){
+        // We delegate the logic of checking the suitability to VulkanPhysicalDevice
+        auto vulkanPhysicalDevice = VulkanPhysicalDevice::Create(vkInstance, device);
+        if(vulkanPhysicalDevice) phsyicalDevices.push_back(std::move(vulkanPhysicalDevice));
+    }
+
+    if(phsyicalDevices.empty()) throw new std::runtime_error("Failed to find any suitable GPUs!");
 }
 
 std::unique_ptr<VulkanInstance> VulkanInstance::Create() {
