@@ -20,13 +20,16 @@ public:
     #else
         const bool validationLayersEnabled = true;
     #endif
-
-    // Returns the required extensions to create vulkan instance
-    std::vector<const char*> GetRequiredExtensions();
-
-    // Returns the validation layers for debugging
-    std::array<const char*, 1> GetValidationLayers() const {
-        return { "VK_LAYER_KHRONOS_validation" };
+VulkanInstance();
+    static std::unique_ptr<VulkanInstance> Create();
+    ~VulkanInstance();
+    
+    VkInstance GetVkInstance() const { return vkInstance; }
+    std::vector<const char *> GetRequiredExtensions();
+    VulkanDebugUtils *GetDebugUtils() { return debugUtils.get(); }
+    std::array<const char *, 1> GetValidationLayers() const
+    {
+        return {"VK_LAYER_KHRONOS_validation"};
     }
 
     // Instance method to check if validation layers are supported
