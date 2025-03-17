@@ -12,6 +12,7 @@ struct QueueFamilyInformation {
     uint32_t sparseBindingBitIndex = UINT32_MAX;
     uint32_t protectedBitIndex = UINT32_MAX;
     uint32_t computeIndex = UINT32_MAX;
+    uint32_t opticalFlowBitNvIndex = UINT32_MAX;
 };
 
 class VulkanPhysicalDevice

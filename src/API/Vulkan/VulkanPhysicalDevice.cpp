@@ -55,23 +55,23 @@ void VulkanPhysicalDevice::PickQueueFamilies()
             break;
         }
         
-        if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if(queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT) {
             queueFamilyInformation.transferBitIndex = i;
             break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if(queueFamilies[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) {
             queueFamilyInformation.sparseBindingBitIndex = i;
             break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if(queueFamilies[i].queueFlags & VK_QUEUE_PROTECTED_BIT) {
             queueFamilyInformation.protectedBitIndex = i;
             break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
-            queueFamilyInformation.computeIndex = i;
+        if(queueFamilies[i].queueFlags & VK_QUEUE_OPTICAL_FLOW_BIT_NV) {
+            queueFamilyInformation.opticalFlowBitNvIndex = i;
             break;
         }
 
