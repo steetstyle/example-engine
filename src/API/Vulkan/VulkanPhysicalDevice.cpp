@@ -18,6 +18,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance vulkanInstance, VkPhysical
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice()
 {
+    logicalDevices.clear();
 }
 
 bool VulkanPhysicalDevice::IsDeviceSuitable() const
@@ -40,43 +41,41 @@ void VulkanPhysicalDevice::PickQueueFamilies()
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, nullptr);
     if (queueFamilyCount == 0) throw std::runtime_error("No queue families found.");
-    
+
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, queueFamilies.data());
 
     for (uint32_t i = 0; i < queueFamilyCount; ++i) {
-        if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+        const auto& props = queueFamilies[i];
+
+        if ((props.queueFlags & VK_QUEUE_GRAPHICS_BIT) && queueFamilyInformation.graphicsBitIndex == UINT32_MAX) {
             queueFamilyInformation.graphicsBitIndex = i;
-            break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if ((props.queueFlags & VK_QUEUE_COMPUTE_BIT) && queueFamilyInformation.computeBitIndex == UINT32_MAX) {
             queueFamilyInformation.computeBitIndex = i;
-            break;
         }
-        
-        if(queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT) {
+
+        if ((props.queueFlags & VK_QUEUE_TRANSFER_BIT) && queueFamilyInformation.transferBitIndex == UINT32_MAX) {
             queueFamilyInformation.transferBitIndex = i;
-            break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) {
+        if ((props.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) && queueFamilyInformation.sparseBindingBitIndex == UINT32_MAX) {
             queueFamilyInformation.sparseBindingBitIndex = i;
-            break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_PROTECTED_BIT) {
+        if ((props.queueFlags & VK_QUEUE_PROTECTED_BIT) && queueFamilyInformation.protectedBitIndex == UINT32_MAX) {
             queueFamilyInformation.protectedBitIndex = i;
-            break;
         }
 
-        if(queueFamilies[i].queueFlags & VK_QUEUE_OPTICAL_FLOW_BIT_NV) {
+#ifdef VK_QUEUE_OPTICAL_FLOW_BIT_NV
+        if ((props.queueFlags & VK_QUEUE_OPTICAL_FLOW_BIT_NV) && queueFamilyInformation.opticalFlowBitNvIndex == UINT32_MAX) {
             queueFamilyInformation.opticalFlowBitNvIndex = i;
-            break;
         }
-
+#endif
     }
 }
+
 
 void VulkanPhysicalDevice::CheckRequiredExtensions()
 {
@@ -92,4 +91,14 @@ void VulkanPhysicalDevice::CheckRequiredExtensions()
             break;
         }
     }
+}
+
+std::shared_ptr<VulkanLogicalDevice> VulkanPhysicalDevice::CreateLogicalDevice() {
+    if (!IsDeviceSuitable()) {
+        throw std::runtime_error("Cannot create logical device: physical device is not suitable.");
+    }
+
+    auto logicalDevice = VulkanLogicalDevice::Create(vkPhysicalDevice, queueFamilyInformation);
+    logicalDevices.push_back(std::move(logicalDevice));
+    return logicalDevices.back();
 }

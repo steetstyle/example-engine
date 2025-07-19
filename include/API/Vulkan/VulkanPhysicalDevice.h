@@ -4,16 +4,8 @@
 #include <vulkan/vulkan.h>
 #include <memory>
 #include <vector>
-
-struct QueueFamilyInformation {
-    uint32_t graphicsBitIndex = UINT32_MAX;
-    uint32_t computeBitIndex = UINT32_MAX;
-    uint32_t transferBitIndex = UINT32_MAX;
-    uint32_t sparseBindingBitIndex = UINT32_MAX;
-    uint32_t protectedBitIndex = UINT32_MAX;
-    uint32_t computeIndex = UINT32_MAX;
-    uint32_t opticalFlowBitNvIndex = UINT32_MAX;
-};
+#include <API/Vulkan/VulkanLogicalDevice.h>
+#include <API/Vulkan/QueueFamilyInformation.h>
 
 class VulkanPhysicalDevice
 {
@@ -24,6 +16,10 @@ public:
 
     bool IsDeviceSuitable() const;
     VkPhysicalDevice GetPhysicalDevice() const { return vkPhysicalDevice; }
+    const QueueFamilyInformation& GetQueueFamilyInformation() const { return queueFamilyInformation; }
+
+    std::shared_ptr<VulkanLogicalDevice> VulkanPhysicalDevice::CreateLogicalDevice();
+    const std::vector<std::shared_ptr<VulkanLogicalDevice>>& GetLogicalDevices() const { return logicalDevices; }
 
 private:
     void PickQueueFamilies();
@@ -34,6 +30,8 @@ private:
     VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
     QueueFamilyInformation queueFamilyInformation;
     bool hasRequiredExtensions = false;
+
+    std::vector<std::shared_ptr<VulkanLogicalDevice>> logicalDevices;
 };
 
 #endif // VULKANPHYSICALDEVICE_H

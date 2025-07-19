@@ -39,10 +39,13 @@ public:
 
     std::vector<std::shared_ptr<VulkanPhysicalDevice>> GetPhysicalDevices() const { return phsyicalDevices; }
 
+    void CreateLogicalDevice();
+
 private:
     VkInstance vkInstance;
     std::unique_ptr<VulkanDebugUtils> debugUtils;
     std::vector<std::shared_ptr<VulkanPhysicalDevice>> phsyicalDevices;
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> chosenPhsyicalDevices;
 };
 
 #endif // VULKANINSTANCE_H

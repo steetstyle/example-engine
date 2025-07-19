@@ -1,4 +1,4 @@
-#include "API/Vulkan/VulkanInstance.h"
+#include <API/Vulkan/VulkanInstance.h>
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <iostream>
@@ -46,6 +46,7 @@ VulkanInstance::VulkanInstance() : vkInstance(VK_NULL_HANDLE) {
     }
 
     PickPhysicalDevice();
+    CreateLogicalDevice();
 }
 
 bool VulkanInstance::CheckValidationLayerSupport() const {
@@ -93,6 +94,20 @@ void VulkanInstance::PickPhysicalDevice()
 
     if(phsyicalDevices.empty()) throw new std::runtime_error("Failed to find any suitable GPUs!");
 }
+
+void VulkanInstance::CreateLogicalDevice() {
+    if (phsyicalDevices.empty()) {
+        throw std::runtime_error("No physical devices available to create logical device!");
+    }
+
+    for (const auto physicalDevice : phsyicalDevices)
+    {
+        auto logicalDevice = physicalDevice->CreateLogicalDevice();
+        chosenPhsyicalDevices.push_back(std::move(physicalDevice));
+        break;
+    }
+}
+
 
 std::unique_ptr<VulkanInstance> VulkanInstance::Create() {
     return std::make_unique<VulkanInstance>();
@@ -148,6 +163,9 @@ VulkanInstance::~VulkanInstance() {
     if(debugUtils) {
         debugUtils.reset();
     }
+
+    phsyicalDevices.clear();
+    chosenPhsyicalDevices.clear();
 
     if (vkInstance != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance, nullptr);
