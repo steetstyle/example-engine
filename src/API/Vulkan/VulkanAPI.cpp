@@ -1,12 +1,13 @@
 #include <API/Vulkan/VulkanAPI.h>
 #include <stdexcept>
 #include <iostream> 
+#include <GLFW/glfw3.h>
 
 VulkanAPI::VulkanAPI() {
 }
 
-void VulkanAPI::Init() {
-    vulkanInstance = VulkanInstance::Create();
+void VulkanAPI::Init(GLFWwindow* window) {
+    vulkanInstance = VulkanInstance::Create(window);
     std::cout << "Vulkan API Initialized\n";
     // Get Vulkan debug utils if validation layers are enabled
     if (vulkanInstance->GetDebugUtils()) {
@@ -19,10 +20,12 @@ void VulkanAPI::Update() {
 }
 
 void VulkanAPI::Cleanup() {
-    vulkanInstance.reset();
-    std::cout << "Vulkan API Cleanup\n";
+    if(vulkanInstance){
+        vulkanInstance.reset();
+    }
 }
 
 VulkanAPI::~VulkanAPI() {
-    Cleanup();
+    Cleanup();        
+    std::cout << "Vulkan API Cleanup\n";
 }

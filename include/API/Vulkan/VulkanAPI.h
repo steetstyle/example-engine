@@ -10,7 +10,7 @@ class VulkanAPI : public IGraphicsAPI
 public:
     VulkanAPI();
 
-    virtual void Init() override;
+    virtual void Init(GLFWwindow* window) override;
     virtual void Update() override;
     virtual void Cleanup() override;
 

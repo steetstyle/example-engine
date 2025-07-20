@@ -1,5 +1,5 @@
-#include "API/Vulkan/VulkanAPI.h"  // Correct header path
-#include "Application.h"  // Correct header path
+#include <API/Vulkan/VulkanAPI.h>
+#include <Application.h>
 #include <iostream> 
 #include <memory> 
 
@@ -10,7 +10,7 @@ void Application::Run() {
     window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 
     api = std::make_unique<VulkanAPI>();
-    api->Init();
+    api->Init(window);
 
     Update();
 }

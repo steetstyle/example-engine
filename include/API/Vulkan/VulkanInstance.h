@@ -7,6 +7,8 @@
 #include <array>
 #include <API/Vulkan/VulkanDebugUtils.h>
 #include <API/Vulkan/VulkanPhysicalDevice.h>
+#include <API/Vulkan/VulkanSurface.h>
+#include <GLFW/glfw3.h>
 
 class VulkanInstance
 {
@@ -16,9 +18,9 @@ public:
 #else
     const bool validationLayersEnabled = true;
 #endif
-    VulkanInstance();
+    VulkanInstance(GLFWwindow* window);
 
-    static std::unique_ptr<VulkanInstance> Create();
+    static std::unique_ptr<VulkanInstance> Create(GLFWwindow* window);
 
     ~VulkanInstance();
 
@@ -37,15 +39,18 @@ public:
 
     void PickPhysicalDevice();
 
-    std::vector<std::shared_ptr<VulkanPhysicalDevice>> GetPhysicalDevices() const { return phsyicalDevices; }
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> GetPhysicalDevices() const { return physicalDevices; }
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> GetChoosenPhysicalDevices() const { return chosenPhysicalDevices; }
 
     void CreateLogicalDevice();
+    void CreateSurface(GLFWwindow* window);
 
 private:
     VkInstance vkInstance;
     std::unique_ptr<VulkanDebugUtils> debugUtils;
-    std::vector<std::shared_ptr<VulkanPhysicalDevice>> phsyicalDevices;
-    std::vector<std::shared_ptr<VulkanPhysicalDevice>> chosenPhsyicalDevices;
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> physicalDevices;
+    std::vector<std::shared_ptr<VulkanPhysicalDevice>> chosenPhysicalDevices;
+    std::unique_ptr<VulkanSurface> surface;
 };
 
 #endif // VULKANINSTANCE_H

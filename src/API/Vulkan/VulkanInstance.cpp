@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-VulkanInstance::VulkanInstance() : vkInstance(VK_NULL_HANDLE) {
+VulkanInstance::VulkanInstance(GLFWwindow* window) : vkInstance(VK_NULL_HANDLE) {
     // Create vulkan instance
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -45,6 +45,7 @@ VulkanInstance::VulkanInstance() : vkInstance(VK_NULL_HANDLE) {
         debugUtils = VulkanDebugUtils::Create(vkInstance);
     }
 
+    CreateSurface(window);
     PickPhysicalDevice();
     CreateLogicalDevice();
 }
@@ -77,40 +78,39 @@ bool VulkanInstance::CheckValidationLayerSupport() const {
 
 void VulkanInstance::PickPhysicalDevice()
 {
-    uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
-
-    if(deviceCount == 0) throw std::runtime_error("failed to find GPUs with Vulkan support");
-
-    std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
-
+    auto devices = VulkanPhysicalDevice::QueryPhysicalDevices(vkInstance);
+    auto activeSurface = surface.get()->GetSurface();
     // For each available physical device, create a VulkanPhysicalDevice
     for(const auto &device : devices){
         // We delegate the logic of checking the suitability to VulkanPhysicalDevice
-        auto vulkanPhysicalDevice = VulkanPhysicalDevice::Create(vkInstance, device);
-        if(vulkanPhysicalDevice) phsyicalDevices.push_back(std::move(vulkanPhysicalDevice));
+        auto vulkanPhysicalDevice = VulkanPhysicalDevice::Create(vkInstance, device, activeSurface);
+        if(vulkanPhysicalDevice) physicalDevices.push_back(std::move(vulkanPhysicalDevice));
     }
 
-    if(phsyicalDevices.empty()) throw new std::runtime_error("Failed to find any suitable GPUs!");
+    if(physicalDevices.empty()) throw new std::runtime_error("Failed to find any suitable GPUs!");
 }
 
 void VulkanInstance::CreateLogicalDevice() {
-    if (phsyicalDevices.empty()) {
+    if (physicalDevices.empty()) {
         throw std::runtime_error("No physical devices available to create logical device!");
     }
 
-    for (const auto physicalDevice : phsyicalDevices)
+    for (const auto physicalDevice : physicalDevices)
     {
         auto logicalDevice = physicalDevice->CreateLogicalDevice();
-        chosenPhsyicalDevices.push_back(std::move(physicalDevice));
+        chosenPhysicalDevices.push_back(std::move(physicalDevice));
         break;
     }
 }
 
+void VulkanInstance::CreateSurface(GLFWwindow* window) {
+    
+    surface = VulkanSurface::Create(window, vkInstance);
+}
 
-std::unique_ptr<VulkanInstance> VulkanInstance::Create() {
-    return std::make_unique<VulkanInstance>();
+
+std::unique_ptr<VulkanInstance> VulkanInstance::Create(GLFWwindow* window) {
+    return std::make_unique<VulkanInstance>(window);
 }
 
 std::vector<const char *> VulkanInstance::GetRequiredExtensions()
@@ -160,12 +160,16 @@ std::vector<const char *> VulkanInstance::GetRequiredExtensions()
 }
 
 VulkanInstance::~VulkanInstance() {
-    if(debugUtils) {
+    if (debugUtils) {
         debugUtils.reset();
     }
 
-    phsyicalDevices.clear();
-    chosenPhsyicalDevices.clear();
+    physicalDevices.clear();
+    chosenPhysicalDevices.clear();
+
+    if (surface) {
+        surface.reset();
+    }
 
     if (vkInstance != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance, nullptr);
